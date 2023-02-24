@@ -1,17 +1,13 @@
 package com.learn.dogs.config
 
-import io.r2dbc.h2.H2ConnectionConfiguration
-import io.r2dbc.h2.H2ConnectionFactory
-import io.r2dbc.spi.ConnectionFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 
-@Configuration
-@EnableR2dbcRepositories
-class DatastoreConfig : AbstractR2dbcConfiguration() {
+
+//@Configuration
+//@EnableR2dbcRepositories
+class DatastoreConfig {
+
+}
+  /*  : AbstractR2dbcConfiguration() {
     @Value("\${spring.r2dbc.name}")
     private val userName: String = ""
 
@@ -24,10 +20,47 @@ class DatastoreConfig : AbstractR2dbcConfiguration() {
     @Bean
     override fun connectionFactory(): ConnectionFactory {
         return H2ConnectionFactory(
-            H2ConnectionConfiguration.builder()
-            .inMemory(dbName)
+            ConnectionFactoryBuilder.withUrl(dbName)
+
             .username(userName)
             .password(password)
             .build())
     }
-}
+
+
+    private val logger: Logger = getLogger(javaClass)
+    private var DB_UUID: String = "testdb"
+
+    @Bean
+    override fun connectionFactory(): ConnectionFactory {
+        val originDataSource = dataSource().unwrap(SimpleDriverDataSource::class.java)
+
+        val config = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+            .option(ConnectionFactoryOptions.DRIVER, "h2")
+            .option(ConnectionFactoryOptions.PROTOCOL, "mem")
+            .option(ConnectionFactoryOptions.DATABASE, DB_UUID)
+            .option(ConnectionFactoryOptions.USER, originDataSource.username!!)
+            .option(ConnectionFactoryOptions.PASSWORD, originDataSource.password!!)
+            .build())
+
+        val queryFormatter = QueryExecutionInfoFormatter.showAll()
+
+        return ProxyConnectionFactory.builder(config)
+            // Log executed query information
+            .onAfterQuery{queryExecInfo ->  queryExecInfo
+                .map(queryFormatter::format)
+                .map(logger::trace)
+                .subscribe()
+            }.build()
+    }
+
+    /**
+     * Enable SQL Schema generation via Liquibase. A dataSource is needed for this
+     */
+    @Bean
+    fun dataSource(): DataSource = EmbeddedDatabaseBuilder()
+        .setName(dbName)
+        .setType(EmbeddedDatabaseType.H2)
+        .ignoreFailedDrops(true)
+        .build()
+}*/
